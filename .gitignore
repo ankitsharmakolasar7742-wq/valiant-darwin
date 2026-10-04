@@ -18,3 +18,10 @@ test_portrait.jpg
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Dynamic uploads (preserve directories with .gitkeep)
+static/uploads/profiles/*
+!static/uploads/profiles/.gitkeep
+static/uploads/parties/*
+!static/uploads/parties/.gitkeep
+
