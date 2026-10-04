@@ -78,6 +78,14 @@ def index():
         votes_count=votes_count
     )
 
+@app.route("/presentation")
+def presentation():
+    return render_template("presentation.html")
+
+@app.route("/download-pptx")
+def download_pptx():
+    return send_from_directory(BASE_DIR, "BioVote_Presentation.pptx", as_attachment=True)
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":

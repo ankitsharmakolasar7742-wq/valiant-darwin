@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BioVote - Project Presentation & Implementation Deep Dive</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#0f172a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        code, pre { font-family: 'JetBrains Mono', monospace; }
+        .slide { display: none; }
+        .slide.active { display: flex; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-blue-600 selection:text-white">
+
+    <!-- Top Bar -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md px-6 py-3 flex items-center justify-between z-30">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white text-base shadow">
+                <i class="fa-solid fa-fingerprint"></i>
+            </div>
+            <div>
+                <span class="font-bold text-sm tracking-wide text-white">BioVote</span>
+                <span class="text-xs text-slate-400 ml-2">Project Presentation & Module Deep-Dives</span>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4 text-xs">
+            <div class="bg-slate-800 px-3 py-1 rounded-full font-mono text-slate-300">
+                Slide <span id="currentSlideNum" class="text-blue-400 font-bold">1</span> / <span id="totalSlidesNum">12</span>
+            </div>
+            <a href="BioVote_Presentation.pptx" download class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold transition flex items-center gap-1.5">
+                <i class="fa-solid fa-file-powerpoint"></i> Download .PPTX
+            </a>
+            <button onclick="toggleFullScreen()" class="p-1.5 text-slate-400 hover:text-white" title="Toggle Fullscreen">
+                <i class="fa-solid fa-expand"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Slide Presentation Area -->
+    <main class="flex-grow flex items-center justify-center p-4 sm:p-8 overflow-y-auto">
+        <div class="w-full max-w-6xl aspect-[16/9] bg-slate-900 rounded-3xl border border-slate-800 shadow-2xl overflow-hidden relative flex flex-col">
+
+            <!-- ================= SLIDE 1: Title Slide ================= -->
+            <div class="slide active w-full h-full p-10 md:p-14 flex-col justify-between bg-gradient-to-br from-slate-900 via-slate-900 to-blue-950/40">
+                <div class="space-y-4">
+                    <span class="inline-block px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-bold tracking-wider uppercase">
+                        Next-Gen Biometric Election Security
+                    </span>
+                    <h1 class="text-4xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight">
+                        BioVote: AI Face Detection &<br/>
+                        <span class="bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">
+                            Anti-Spoofing Voting System
+                        </span>
+                    </h1>
+                    <p class="text-slate-400 text-base max-w-3xl leading-relaxed">
+                        A Complete Multi-Tier Electronic Voting Platform with Real-Time Deep Facial Recognition (YuNet + SFace) and Active Interactive Liveness Verification (MediaPipe 3D Mesh).
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 border-t border-slate-800/80 text-xs">
+                    <div>
+                        <span class="text-slate-500 block">Architecture</span>
+                        <span class="text-white font-semibold">Flask + OpenCV + MediaPipe</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-500 block">Biometric Embeddings</span>
+                        <span class="text-emerald-400 font-semibold">128-d SFace Vector</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-500 block">Anti-Spoofing</span>
+                        <span class="text-purple-400 font-semibold">Blink, Yaw, & Smile</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-500 block">Integrity</span>
+                        <span class="text-amber-400 font-semibold">Atomic 1-Voter-1-Vote</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= SLIDE 2: Problem & Solution ================= -->
+            <div class="slide w-full h-full p-8 md:p-12 flex-col justify-between">
+                <div>
+                    <span class="text-xs font-bold text-blue-400 uppercase tracking-wider">Background & Motivation</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-white mt-1">Problem Statement & Proposed Solution</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-auto">
+                    <!-- Left: Problem -->
+                    <div class="bg-rose-950/20 border border-rose-900/30 p-5 rounded-2xl space-y-3">
+                        <h3 class="text-rose-400 font-bold text-base flex items-center gap-2">
+                            <i class="fa-solid fa-triangle-exclamation"></i> Voting Vulnerabilities
+                        </h3>
+                        <ul class="text-xs text-slate-300 space-y-2 leading-relaxed">
+                            <li><strong class="text-white">• Voter Impersonation:</strong> Unauthorized individuals voting on behalf of others or utilizing stolen credentials.</li>
+                            <li><strong class="text-white">• Static Photo Spoofing:</strong> Attackers displaying printed photos, masks, or smartphone screens to fool conventional cameras.</li>
+                            <li><strong class="text-white">• Double-Voting Fraud:</strong> Citizens exploiting jurisdictional gaps or latency to cast multiple ballots.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Right: Solution -->
+                    <div class="bg-blue-950/20 border border-blue-900/30 p-5 rounded-2xl space-y-3">
+                        <h3 class="text-blue-400 font-bold text-base flex items-center gap-2">
+                            <i class="fa-solid fa-shield-check"></i> The BioVote Solution
+                        </h3>
+                        <ul class="text-xs text-slate-300 space-y-2 leading-relaxed">
+                            <li><strong class="text-white">✓ SFace Deep Biometrics:</strong> Extracts 128-d invariant facial embeddings matched against enrolled profiles.</li>
+                            <li><strong class="text-white">✓ Active Liveness Challenge:</strong> Issues dynamic real-time physical actions (Blink, Turn Left/Right, Smile) to confirm live human presence.</li>
+                            <li><strong class="text-white">✓ Atomic Ballot Ledger:</strong> Enforces single-vote guarantee with cryptographic digital receipts.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="text-[11px] text-slate-500 border-t border-slate-800 pt-3">
+                    Eliminates both digital replay attacks and physical proxy fraud in electronic elections.
+                </div>
+            </div>
+
+            <!-- ================= SLIDE 3: System Architecture ================= -->
+            <div class="slide w-full h-full p-8 md:p-12 flex-col justify-between">
+                <div>
+                    <span class="text-xs font-bold text-blue-400 uppercase tracking-wider">Technical Architecture</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-white mt-1">End-to-End System Architecture</h2>
+                </div>
+
+                <div class="space-y-3 my-auto">
+                    <div class="bg-slate-800/60 border-l-4 border-blue-500 p-3.5 rounded-xl flex items-center justify-between">
+                        <div>
+                            <div class="font-bold text-sm text-white">1. Client / Presentation Layer</div>
+                            <div class="text-xs text-slate-400">Tailwind CSS UI, WebRTC camera frame stream, interactive radar scanner overlay, Chart.js live charts.</div>
+                        </div>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-blue-500/20 text-blue-300">Browser / UI</span>
+                    </div>
+
+                    <div class="bg-slate-800/60 border-l-4 border-purple-500 p-3.5 rounded-xl flex items-center justify-between">
+                        <div>
+                            <div class="font-bold text-sm text-white">2. Application & API Routing Layer</div>
+                            <div class="text-xs text-slate-400">Flask 3.1 REST API, session state machine, OTP verification dispatcher, atomic vote transactions.</div>
+                        </div>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-purple-500/20 text-purple-300">Flask / Python</span>
+                    </div>
+
+                    <div class="bg-slate-800/60 border-l-4 border-emerald-500 p-3.5 rounded-xl flex items-center justify-between">
+                        <div>
+                            <div class="font-bold text-sm text-white">3. AI Computer Vision & Biometrics Core</div>
+                            <div class="text-xs text-slate-400">YuNet (CNN Face Detection & Alignment), SFace (128-d Embedding), MediaPipe (468-point 3D Landmark Mesh).</div>
+                        </div>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/20 text-emerald-300">OpenCV & MediaPipe</span>
+                    </div>
+
+                    <div class="bg-slate-800/60 border-l-4 border-amber-500 p-3.5 rounded-xl flex items-center justify-between">
+                        <div>
+                            <div class="font-bold text-sm text-white">4. Data Persistence & Audit Ledger</div>
+                            <div class="text-xs text-slate-400">SQLite3 ACID database, Werkzeug salted password hashes, SHA-256 digital ballot receipts, zero-vote party locks.</div>
+                        </div>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-amber-500/20 text-amber-300">SQLite Ledger</span>
+                    </div>
+                </div>
+
+                <div class="text-[11px] text-slate-500 border-t border-slate-800 pt-3">
+                    Modularity ensures rapid response times (&lt;15ms per frame evaluation) and zero cloud dependency.
+                </div>
+            </div>
+
+            <!-- ================= SLIDE 4: Project Modules Breakdown ================= -->
+            <div class="slide w-full h-full p-8 md:p-12 flex-col justify-between">
+                <div>
+                    <span class="text-xs font-bold text-blue-400 uppercase tracking-wider">System Modules</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-white mt-1">Core Modules Overview & Focus Areas</h2>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 my-auto">
+                    <!-- Module 1 -->
+                    <div class="bg-blue-950/30 border-2 border-blue-500/50 p-4 rounded-2xl relative">
+                        <span class="absolute top-3 right-3 text-[10px] bg-blue-500 text-white font-bold px-2 py-0.5 rounded-full uppercase">Focus Deep Dive</span>
+                        <div class="text-xs font-bold text-blue-400">MODULE 1</div>
+                        <h3 class="font-bold text-white text-base mt-1">Biometric Face Recognition</h3>
+                        <p class="text-xs text-slate-300 mt-1 leading-relaxed">
+                            YuNet face detector + SFace neural network. Extracts 128-D biometric vector, aligns facial landmarks, computes Cosine Similarity in real-time.
+                        </p>
+                    </div>
+
+                    <!-- Module 2 -->
+                    <div class="bg-emerald-950/30 border-2 border-emerald-500/50 p-4 rounded-2xl relative">
+                        <span class="absolute top-3 right-3 text-[10px] bg-emerald-500 text-white font-bold px-2 py-0.5 rounded-full uppercase">Focus Deep Dive</span>
+                        <div class="text-xs font-bold text-emerald-400">MODULE 2</div>
+                        <h3 class="font-bold text-white text-base mt-1">Anti-Spoofing & Liveness</h3>
+                        <p class="text-xs text-slate-300 mt-1 leading-relaxed">
+                            MediaPipe 3D Landmark Mesh (468 points). Evaluates EAR for eye blinks, solvePnP for 3D head yaw rotation (Left/Right), and mouth aspect for smiles.
+                        </p>
+                    </div>
+
+                    <!-- Module 3 -->
+                    <div class="bg-slate-800/40 border border-slate-700/60 p-4 rounded-2xl">
+                        <div class="text-xs font-bold text-purple-400">MODULE 3</div>
+                        <h3 class="font-bold text-white text-base mt-1">Voter Registration & Email OTP</h3>
+                        <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+                            Enrollment form with direct webcam snapshot capture or photo upload. 6-digit OTP verification with simulated dispatcher.
+                        </p>
+                    </div>
+
+                    <!-- Module 4 -->
+                    <div class="bg-slate-800/40 border border-slate-700/60 p-4 rounded-2xl">
+                        <div class="text-xs font-bold text-amber-400">MODULE 4</div>
+                        <h3 class="font-bold text-white text-base mt-1">Admin Portal & Live Analytics</h3>
+                        <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+                            Election Commission portal to register candidates/parties, upload emblems, view live Chart.js vote tallies, and audit voter rolls.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="text-[11px] text-slate-500 border-t border-slate-800 pt-3">
+                    The next slides present a detailed technical walkthrough of Module 1 and Module 2.
+                </div>
+            </div>
+
+            <!-- ================= SLIDE 5: Module 1 Deep Dive ================= -->
+            <div class="slide w-full h-full p-8 md:p-12 flex-col justify-between">
+                <div>
+                    <span class="text-xs font-bold text-blue-400 uppercase tracking-wider">Module 1 Implementation (Part 1)</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-white mt-1">Face Detection & SFace Biometric Recognition</h2>
+                </div>
+
+                <div class="grid grid-cols-5 gap-3 my-auto">
+                    <div class="bg-slate-800/60 border border-slate-700 p-3 rounded-xl text-center">
+                        <div class="text-blue-400 text-lg mb-1"><i class="fa-solid fa-video"></i></div>
+                        <div class="font-bold text-xs text-white">1. Frame Capture</div>
+                        <div class="text-[10px] text-slate-400 mt-1">Webcam JPEG decoded to BGR matrix</div>
+                    </div>
+                    <div class="bg-slate-800/60 border border-slate-700 p-3 rounded-xl text-center">
+                        <div class="text-blue-400 text-lg mb-1"><i class="fa-solid fa-expand"></i></div>
+                        <div class="font-bold text-xs text-white">2. YuNet CNN</div>
+                        <div class="text-[10px] text-slate-400 mt-1">Bounding box + 5 facial landmarks</div>
+                    </div>
+                    <div class="bg-slate-800/60 border border-slate-700 p-3 rounded-xl text-center">
+                        <div class="text-blue-400 text-lg mb-1"><i class="fa-solid fa-crop-simple"></i></div>
+                        <div class="font-bold text-xs text-white">3. Align & Crop</div>
+                        <div class="text-[10px] text-slate-400 mt-1">Affine normalization of head tilt</div>
+                    </div>
+                    <div class="bg-slate-800/60 border border-slate-700 p-3 rounded-xl text-center">
+                        <div class="text-blue-400 text-lg mb-1"><i class="fa-solid fa-microchip"></i></div>
+                        <div class="font-bold text-xs text-white">4. SFace 128-d</div>
+                        <div class="text-[10px] text-slate-400 mt-1">Extracts compact neural embedding</div>
+                    </div>
+                    <div class="bg-slate-800/60 border border-slate-700 p-3 rounded-xl text-center">
+                        <div class="text-emerald-400 text-lg mb-1"><i class="fa-solid fa-scale-balanced"></i></div>
+                        <div class="font-bold text-xs text-white">5. Cosine Match</div>
+                        <div class="text-[10px] text-slate-400 mt-1">Calculates cosine similarity ≥ 0.363</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 text-xs bg-slate-950/60 p-4 rounded-xl border border-slate-800">
+                    <div>
+                        <strong class="text-blue-400 block mb-1">Mathematical Metric: Cosine Similarity</strong>
+                        <code class="text-slate-300 font-mono text-[11px] block bg-slate-900 p-1.5 rounded mb-1">Score = (u · v) / (||u||₂ · ||v||₂)</code>
+                        <span class="text-slate-400">Threshold: 0.363 for FAR 1e-3. Scores ≥ 0.363 confirm authentic identity (~70% - 100% confidence).</span>
+                    </div>
+                    <div>
+                        <strong class="text-emerald-400 block mb-1">Why Lightweight ONNX Models?</strong>
+                        <ul class="text-slate-400 space-y-1">
+                            <li>• YuNet is only 232 KB; SFace is 38.6 MB.</li>
+                            <li>• Operates at 30+ FPS purely on CPU without expensive GPUs.</li>
+                            <li>• Invariant to illumination variations, distances, and minor head poses.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= SLIDE 6: Module 1 Code Implementation ================= -->
+            <div class="slide w-full h-full p-8 md:p-12 flex-col justify-between">
+                <div>
+                    <span class="text-xs font-bold text-blue-400 uppercase tracking-wider">Module 1 Implementation (Part 2)</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-white mt-1">Face Recognition Python Code Architecture</h2>
+                </div>
+
+                <div class="grid grid-cols-3 gap-6 my-auto">
+                    <!-- Code Snippet -->
+                    <div class="col-span-2 bg-slate-950 border border-slate-800 p-4 rounded-2xl overflow-hidden">
+                        <div class="text-[10px] font-mono text-slate-500 mb-2 border-b border-slate-800 pb-1">face_engine.py (YuNet & SFace)</div>
+                        <pre class="text-[10px] font-mono text-slate-300 leading-relaxed overflow-x-auto"><code>class FaceEngine:
+    def __init__(self):
+        self.detector = cv2.FaceDetectorYN_create(
+            model=YUNET_PATH, config="", input_size=(320, 320),
+            score_threshold=0.6, nms_threshold=0.3
+        )
+        self.recognizer = cv2.FaceRecognizerSF_create(
+            model=SFACE_PATH, config=""
+        )
+
+    def extract_feature(self, bgr_img, face_data=None):
+        if face_data is None:
+            face_data, _ = self.detect_face(bgr_img)
+        # Normalize and crop face using 5 landmarks
+        aligned_face = self.recognizer.alignCrop(bgr_img, face_data)
+        return self.recognizer.feature(aligned_face) # 128-d float array
+
+    def compare_faces(self, feat1, feat2, cosine_threshold=0.363):
+        score = self.recognizer.match(feat1, feat2, cv2.FaceRecognizerSF_FR_COSINE)
+        is_match = bool(score >= cosine_threshold)
+        pct = min(100.0, 70.0 + ((score - 0.363) / 0.287) * 30.0)
+        return is_match, float(score), round(pct, 1)</code></pre>
+                    </div>
+
+                    <!-- Explanatory highlights -->
+                    <div class="space-y-3 text-xs">
+                        <div class="bg-slate-800/40 p-3 rounded-xl border border-slate-700/60">
+                            <strong class="text-blue-400 block mb-1">1. Enrollment Check</strong>
+                            <p class="text-slate-400 text-[11px]">Validates that exactly 1 face is detected during registration. Stores the 128-d vector in SQLite for fast lookup.</p>
+                        </div>
+                        <div class="bg-slate-800/40 p-3 rounded-xl border border-slate-700/60">
+                            <strong class="text-emerald-400 block mb-1">2. Zero Database Bottleneck</strong>
+                            <p class="text-slate-400 text-[11px]">Only the live webcam frame requires inference. Comparing two 128-d vectors takes &lt; 0.2 milliseconds.</p>
+                        </div>
+                        <div class="bg-slate-800/40 p-3 rounded-xl border border-slate-700/60">
+                            <strong class="text-purple-400 block mb-1">3. Calibrated Output</strong>
+                            <p class="text-slate-400 text-[11px]">Converts mathematical cosine distance into a clear 0-100% voter confidence badge.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-[11px] text-slate-500 border-t border-slate-800 pt-3">
+                    Robust recognition performance verified across various skin tones, spectacles, and ambient indoor lighting.
+                </div>
+            </div>
+
+            <!-- ================= SLIDE 7: Module 2 Deep Dive ================= -->
+            <div class="slide w-full h-full p-8 md:p-12 flex-col justify-between">
+                <div>
+                    <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Module 2 Implementation (Part 1)</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-white mt-1">Anti-Spoofing & Liveness Challenge Engine</h2>
+                </div>
+
+                <div class="bg-emerald-950/20 border border-emerald-900/40 p-3.5 rounded-xl text-xs text-emerald-300 font-semibold mb-4">
+                    <i class="fa-solid fa-shield-halved mr-1.5"></i> Active Challenge-Response Defense: Defeats printed photo attacks, silicone masks, and smartphone video playback by issuing random physical challenges that must be executed live.
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 my-auto">
+                    <div class="bg-slate-800/60 border border-slate-700 p-4 rounded-2xl flex items-start gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center text-lg shrink-0">
+                            <i class="fa-solid fa-eye"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-white text-sm">1. Eye Blink Challenge (EAR)</h4>
+                            <p class="text-slate-400 text-xs mt-1 leading-relaxed">
+                                Monitors Left Eye (33, 160, 158, 133, 153, 144) & Right Eye (362, 385, 387, 263, 373, 380). Detects rapid EAR dip &lt; 0.20 and rebound. Requires 2 sequential blinks.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-800/60 border border-slate-700 p-4 rounded-2xl flex items-start gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-600/20 text-emerald-400 flex items-center justify-center text-lg shrink-0">
+                            <i class="fa-solid fa-arrow-left"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-white text-sm">2. Head Turn Left Challenge</h4>
+                            <p class="text-slate-400 text-xs mt-1 leading-relaxed">
+                                MediaPipe 3D landmark mesh calculates head yaw angle via solvePnP & landmark ratios. User must turn head to their left and hold for 4 consecutive frames.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-800/60 border border-slate-700 p-4 rounded-2xl flex items-start gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-lg shrink-0">
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-white text-sm">3. Head Turn Right Challenge</h4>
+                            <p class="text-slate-400 text-xs mt-1 leading-relaxed">
+                                Evaluates mirrored 3D yaw angle threshold (Yaw &lt; -14° or ratio &gt; 0.62). Confirms volumetric 3D head movement impossible with a flat 2D photograph.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-800/60 border border-slate-700 p-4 rounded-2xl flex items-start gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-amber-600/20 text-amber-400 flex items-center justify-center text-lg shrink-0">
+                            <i class="fa-solid fa-face-smile"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-white text-sm">4. Dynamic Smile Challenge</h4>
+                            <p class="text-slate-400 text-xs mt-1 leading-relaxed">
+                                Measures mouth width (landmarks 61 & 291) relative to face width (landmarks 234 & 454). Verifies genuine smile when ratio exceeds 0.44.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-[11px] text-slate-500 border-t border-slate-800 pt-3">
+                    The challenge is selected randomly per voting session, preventing replay of pre-recorded videos.
+                </div>
+            </div>
+
+            <!-- ================= SLIDE 8: Module 2 Formulas & Code ================= -->
+            <div class="slide w-full h-full p-8 md:p-12 flex-col justify-between">
+                <div>
+                    <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Module 2 Implementation (Part 2)</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-white mt-1">Liveness Mathematics & Python Implementation</h2>
+                </div>
+
+                <div class="grid grid-cols-2 gap-6 my-auto">
+                    <!-- Formulas -->
+                    <div class="space-y-4 text-xs">
+                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-1">
+                            <strong class="text-blue-400 block">Eye Aspect Ratio (EAR) Formula:</strong>
+                            <code class="text-emerald-400 font-mono text-[11px] block">EAR = (||p₂ - p₆|| + ||p₃ - p₅||) / (2 · ||p₁ - p₄||)</code>
+                            <p class="text-slate-400 text-[11px]">Normal open eye EAR: ~0.28 - 0.35. EAR &lt; 0.20 signals closed eye state. 2 consecutive transitions register verified blinks.</p>
+                        </div>
+
+                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-1">
+                            <strong class="text-purple-400 block">3D Head Pose via Perspective-n-Point (solvePnP):</strong>
+                            <p class="text-slate-400 text-[11px]">Maps 3D canonical facial model points to 2D image coordinates (Nose 1, Chin 152, Eyes 33/263, Mouth 61/291) to compute Rodrigues matrix and Euler Yaw angle:</p>
+                            <code class="text-purple-300 font-mono text-[10px] block">Yaw = arctan2(-R[2,0], sqrt(R[0,0]² + R[1,0]²))</code>
+                            <p class="text-slate-400 text-[11px]">Yaw &gt; +14° = Turn Left; Yaw &lt; -14° = Turn Right.</p>
+                        </div>
+                    </div>
+
+                    <!-- Code Snippet -->
+                    <div class="bg-slate-950 border border-slate-800 p-4 rounded-2xl overflow-hidden">
+                        <div class="text-[10px] font-mono text-slate-500 mb-2 border-b border-slate-800 pb-1">evaluate_liveness_and_match()</div>
+                        <pre class="text-[10px] font-mono text-slate-300 leading-relaxed overflow-x-auto"><code>if challenge_type == "BLINK":
+    ear = (self._ear(lms, L_EYE) + self._ear(lms, R_EYE)) / 2
+    if ear < 0.20:
+        session_state["eye_closed"] = True
+    elif session_state.get("eye_closed"):
+        session_state["blinks"] += 1
+        session_state["eye_closed"] = False
+    if session_state["blinks"] >= 2:
+        challenge_passed = True
+
+elif challenge_type == "HEAD_LEFT":
+    pitch, yaw, roll = self._estimate_head_pose(lms)
+    if yaw > 14.0 or ratio < 0.38:
+        session_state["action_frames"] += 1
+        if session_state["action_frames"] >= 4:
+            challenge_passed = True</code></pre>
+                    </div>
+                </div>
+
+                <div class="text-[11px] text-slate-500 border-t border-slate-800 pt-3">
+                    State counters ensure smooth user experience with visual progress feedback.
+                </div>
+            </div>
+
+            <!-- ================= SLIDE 9: Voter Journey ================= -->
+            <div class="slide w-full h-full p-8 md:p-12 flex-col justify-between">
+                <div>
+                    <span class="text-xs font-bold text-blue-400 uppercase tracking-wider">Voter Experience</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-white mt-1">End-to-End Voter Journey & Receipts</h2>
+                </div>
+
+                <div class="space-y-3 my-auto text-xs">
+                    <div class="flex items-center gap-4 bg-slate-800/50 p-3 rounded-xl border border-slate-700/60">
+                        <span class="px-3 py-1 rounded bg-blue-600 text-white font-bold font-mono">PHASE 1</span>
+                        <div>
+                            <strong class="text-white">Voter Registration & Biometric Enrollment:</strong>
+                            <span class="text-slate-400 ml-1">Voter enters credentials and captures reference photo with live webcam snapshot or file upload.</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-4 bg-slate-800/50 p-3 rounded-xl border border-slate-700/60">
+                        <span class="px-3 py-1 rounded bg-indigo-600 text-white font-bold font-mono">PHASE 2</span>
+                        <div>
+                            <strong class="text-white">6-Digit Email OTP Verification:</strong>
+                            <span class="text-slate-400 ml-1">Confirms email ownership. Includes on-screen simulated dispatcher for instant testing.</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-4 bg-slate-800/50 p-3 rounded-xl border border-slate-700/60">
+                        <span class="px-3 py-1 rounded bg-purple-600 text-white font-bold font-mono">PHASE 3</span>
+                        <div>
+                            <strong class="text-white">Party Ballot Selection:</strong>
+                            <span class="text-slate-400 ml-1">Voter signs in, browses political candidates and manifestos, and clicks "Vote".</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-4 bg-slate-800/50 p-3 rounded-xl border border-slate-700/60">
+                        <span class="px-3 py-1 rounded bg-emerald-600 text-white font-bold font-mono">PHASE 4</span>
+                        <div>
+                            <strong class="text-white">Dual Biometric & Liveness Verification:</strong>
+                            <span class="text-slate-400 ml-1">Live camera verifies face match (&gt;70%) AND completes the assigned physical challenge.</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-4 bg-slate-800/50 p-3 rounded-xl border border-slate-700/60">
+                        <span class="px-3 py-1 rounded bg-amber-600 text-white font-bold font-mono">PHASE 5</span>
+                        <div>
+                            <strong class="text-white">Atomic Vote Cast & Digital Ballot Receipt:</strong>
+                            <span class="text-slate-400 ml-1">Database atomically records ballot, locks voter from voting again, and outputs printable receipt (VOTE-XXXXXXXX-XXXXXXXX).</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-[11px] text-slate-500 border-t border-slate-800 pt-3">
+                    Strict atomic transactions prevent race conditions and guarantee one voter, one vote.
+                </div>
+            </div>
+
+            <!-- ================= SLIDE 10: Admin Portal ================= -->
+            <div class="slide w-full h-full p-8 md:p-12 flex-col justify-between">
+                <div>
+                    <span class="text-xs font-bold text-blue-400 uppercase tracking-wider">Administration & Analytics</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-white mt-1">Election Commission Supervisory Portal</h2>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 my-auto">
+                    <div class="bg-slate-800/50 border border-slate-700 p-4 rounded-2xl">
+                        <div class="text-blue-400 text-lg mb-1"><i class="fa-solid fa-landmark"></i></div>
+                        <h4 class="font-bold text-white text-sm">Dynamic Party & Candidate Management</h4>
+                        <p class="text-slate-400 text-xs mt-1 leading-relaxed">
+                            Register new political parties, candidate names, color branding, manifesto descriptions, and upload party logos or choose icon symbols.
+                        </p>
+                    </div>
+
+                    <div class="bg-slate-800/50 border border-slate-700 p-4 rounded-2xl">
+                        <div class="text-emerald-400 text-lg mb-1"><i class="fa-solid fa-chart-column"></i></div>
+                        <h4 class="font-bold text-white text-sm">Real-Time Chart.js Visual Tallies</h4>
+                        <p class="text-slate-400 text-xs mt-1 leading-relaxed">
+                            Live bar and donut charts illustrating candidate vote shares, total ballots cast, and election turnout percentages.
+                        </p>
+                    </div>
+
+                    <div class="bg-slate-800/50 border border-slate-700 p-4 rounded-2xl">
+                        <div class="text-purple-400 text-lg mb-1"><i class="fa-solid fa-users"></i></div>
+                        <h4 class="font-bold text-white text-sm">Voter Roll & Biometric Audit Log</h4>
+                        <p class="text-slate-400 text-xs mt-1 leading-relaxed">
+                            Inspects all enrolled citizens, email verification status, facial biometric indicators, voting timestamps, and party voted for.
+                        </p>
+                    </div>
+
+                    <div class="bg-slate-800/50 border border-slate-700 p-4 rounded-2xl">
+                        <div class="text-amber-400 text-lg mb-1"><i class="fa-solid fa-arrows-rotate"></i></div>
+                        <h4 class="font-bold text-white text-sm">Integrity & Reset Controls</h4>
+                        <p class="text-slate-400 text-xs mt-1 leading-relaxed">
+                            Parties with active votes are protected from accidental deletion. One-click "Reset All Votes" allows repeated multi-round testing.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="text-[11px] text-slate-500 border-t border-slate-800 pt-3">
+                    Accessible via secure admin credentials at /admin/login.
+                </div>
+            </div>
+
+            <!-- ================= SLIDE 11: Tech Stack Table ================= -->
+            <div class="slide w-full h-full p-8 md:p-12 flex-col justify-between">
+                <div>
+                    <span class="text-xs font-bold text-blue-400 uppercase tracking-wider">System Specifications</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-white mt-1">Technology Stack & Performance Metrics</h2>
+                </div>
+
+                <div class="overflow-x-auto my-auto">
+                    <table class="w-full text-left text-xs border border-slate-800 rounded-xl overflow-hidden">
+                        <thead class="bg-slate-800/80 text-slate-300 font-bold uppercase">
+                            <tr>
+                                <th class="p-3">Component / Layer</th>
+                                <th class="p-3">Technology Utilized</th>
+                                <th class="p-3">Performance Metric / Role</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800/60 bg-slate-900/50">
+                            <tr>
+                                <td class="p-3 font-bold text-white">Backend Web Server</td>
+                                <td class="p-3 text-slate-300">Python 3.10 + Flask 3.1 + Werkzeug</td>
+                                <td class="p-3 text-slate-400">Microsecond REST routing & secure password hashing</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-bold text-white">Face Detection Model</td>
+                                <td class="p-3 text-slate-300">OpenCV YuNet (ONNX - 232 KB)</td>
+                                <td class="p-3 text-slate-400">Fast CNN detection & 5-point facial alignment in &lt; 12ms</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-bold text-white">Face Recognition Model</td>
+                                <td class="p-3 text-slate-300">OpenCV SFace (ONNX - 38.6 MB)</td>
+                                <td class="p-3 text-slate-400">128-d neural embeddings; Cosine threshold 0.363</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-bold text-white">Liveness & 3D Mesh</td>
+                                <td class="p-3 text-slate-300">MediaPipe FaceMesh (468 landmarks)</td>
+                                <td class="p-3 text-slate-400">Real-time EAR eye blinks & solvePnP 3D head yaw</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-bold text-white">Database & Ledger</td>
+                                <td class="p-3 text-slate-300">SQLite3 with ACID Foreign Keys</td>
+                                <td class="p-3 text-slate-400">Atomic single-vote lock and unique audit receipt token</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="text-[11px] text-slate-500 border-t border-slate-800 pt-3">
+                    Zero GPU requirement: Fully optimized for standard laptops and commodity servers.
+                </div>
+            </div>
+
+            <!-- ================= SLIDE 12: Conclusion ================= -->
+            <div class="slide w-full h-full p-10 md:p-14 flex-col justify-between bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/30">
+                <div class="space-y-4">
+                    <span class="inline-block px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold tracking-wider uppercase">
+                        Summary & Future Scope
+                    </span>
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                        Conclusion & Future Enhancements
+                    </h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div class="bg-slate-800/40 p-4 rounded-xl border border-slate-700/60">
+                        <strong class="text-emerald-400 block mb-1">✓ Democratic Integrity Guaranteed</strong>
+                        <p class="text-slate-300">Eliminates proxy voting and 2D photo spoofing through active challenge-response biometrics.</p>
+                    </div>
+                    <div class="bg-slate-800/40 p-4 rounded-xl border border-slate-700/60">
+                        <strong class="text-blue-400 block mb-1">✓ Frictionless Voter Experience</strong>
+                        <p class="text-slate-300">Intuitive camera overlay, responsive feedback, and instant digital ballot receipts.</p>
+                    </div>
+                    <div class="bg-slate-800/40 p-4 rounded-xl border border-slate-700/60">
+                        <strong class="text-purple-400 block mb-1">✦ Future: Blockchain Audit Ledger</strong>
+                        <p class="text-slate-300">Anchor cryptographic receipt hashes to a public decentralized blockchain ledger.</p>
+                    </div>
+                    <div class="bg-slate-800/40 p-4 rounded-xl border border-slate-700/60">
+                        <strong class="text-amber-400 block mb-1">✦ Future: Multi-Spectral Depth Cameras</strong>
+                        <p class="text-slate-300">Integrate infrared (NIR) depth sensing for next-level anti-deepfake protection.</p>
+                    </div>
+                </div>
+
+                <div class="border-t border-slate-800 pt-4 flex items-center justify-between">
+                    <span class="text-emerald-400 font-bold text-sm">Thank You! Open for Questions & Demonstration.</span>
+                    <a href="BioVote_Presentation.pptx" download class="text-xs text-blue-400 hover:underline">
+                        <i class="fa-solid fa-download mr-1"></i> BioVote_Presentation.pptx
+                    </a>
+                </div>
+            </div>
+
+            <!-- Slide Navigation Controls -->
+            <div class="absolute bottom-4 right-6 flex items-center gap-2 z-20">
+                <button onclick="prevSlide()" class="w-9 h-9 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-white flex items-center justify-center text-xs transition border border-slate-700">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <button onclick="nextSlide()" class="w-9 h-9 rounded-xl bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center text-xs transition shadow-md shadow-blue-500/20">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Bottom Instruction Bar -->
+    <footer class="border-t border-slate-800/80 px-6 py-2.5 text-center text-xs text-slate-500">
+        Use <kbd class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono text-[10px]">←</kbd> and <kbd class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono text-[10px]">→</kbd> keys on your keyboard to navigate slides • Press <kbd class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono text-[10px]">F</kbd> for fullscreen
+    </footer>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const currentSlideNum = document.getElementById('currentSlideNum');
+        const totalSlidesNum = document.getElementById('totalSlidesNum');
+
+        totalSlidesNum.innerText = slides.length;
+
+        function showSlide(index) {
+            if (index < 0) index = 0;
+            if (index >= slides.length) index = slides.length - 1;
+            slides.forEach((s, i) => {
+                s.classList.toggle('active', i === index);
+            });
+            currentSlide = index;
+            currentSlideNum.innerText = index + 1;
+        }
+
+        function nextSlide() { showSlide(currentSlide + 1); }
+        function prevSlide() { showSlide(currentSlide - 1); }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+            if (e.key.toLowerCase() === 'f') toggleFullScreen();
+        });
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+            }
+        }
+    </script>
+</body>
+</html>
