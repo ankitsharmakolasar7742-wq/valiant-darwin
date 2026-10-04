@@ -1,0 +1,282 @@
+{% extends "base.html" %}
+
+{% block title %}Voter Registration - BioVote{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-10">
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden">
+        <!-- Header Banner -->
+        <div class="bg-gradient-to-r from-blue-700 via-indigo-700 to-blue-800 p-8 text-white text-center relative overflow-hidden">
+            <div class="absolute -right-10 -bottom-10 opacity-10 text-9xl">
+                <i class="fa-solid fa-id-card"></i>
+            </div>
+            <div class="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white text-2xl mx-auto mb-3 shadow-inner">
+                <i class="fa-solid fa-user-plus"></i>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">Voter Biometric Enrollment</h1>
+            <p class="text-blue-100 text-xs sm:text-sm mt-1 max-w-md mx-auto">
+                Register with your credentials and reference facial portrait for biometric-secured voting.
+            </p>
+        </div>
+
+        <!-- Registration Form -->
+        <form action="{{ url_for('register') }}" method="POST" enctype="multipart/form-data" class="p-6 sm:p-8 space-y-6" id="registerForm">
+            <!-- Full Name & Username -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5" for="full_name">
+                        Full Legal Name <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-user"></i>
+                        </span>
+                        <input type="text" id="full_name" name="full_name" required placeholder="e.g. Johnathan Doe"
+                               class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm text-slate-800 transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5" for="username">
+                        Voter Username <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-at"></i>
+                        </span>
+                        <input type="text" id="username" name="username" required placeholder="e.g. jdoe2026"
+                               class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm text-slate-800 transition">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Email Address -->
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5" for="email">
+                    Email Address <span class="text-rose-500">*</span>
+                </label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-envelope"></i>
+                    </span>
+                    <input type="email" id="email" name="email" required placeholder="voter@example.com"
+                           class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm text-slate-800 transition">
+                </div>
+                <p class="text-[11px] text-slate-500 mt-1">A 6-digit verification code will be sent to this email.</p>
+            </div>
+
+            <!-- Password & Confirm Password -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5" for="password">
+                        Security Password <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+                        <input type="password" id="password" name="password" required minlength="6" placeholder="Min. 6 characters"
+                               class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm text-slate-800 transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5" for="confirm_password">
+                        Confirm Password <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-lock-open"></i>
+                        </span>
+                        <input type="password" id="confirm_password" name="confirm_password" required minlength="6" placeholder="Re-type password"
+                               class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm text-slate-800 transition">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Photo Section: Upload File or Camera Snap -->
+            <div class="border-t border-slate-200 pt-6">
+                <div class="flex items-center justify-between mb-2">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                        Voter Facial Profile Photo <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="flex gap-2">
+                        <button type="button" id="btnUseFile" class="text-xs font-medium px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 border border-blue-200">
+                            <i class="fa-solid fa-upload mr-1"></i>Upload File
+                        </button>
+                        <button type="button" id="btnUseWebcam" class="text-xs font-medium px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200">
+                            <i class="fa-solid fa-camera mr-1"></i>Use Camera
+                        </button>
+                    </div>
+                </div>
+
+                <!-- File Upload Container -->
+                <div id="fileUploadContainer" class="mt-2">
+                    <div class="border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-2xl p-6 text-center cursor-pointer transition bg-slate-50/50 hover:bg-blue-50/30"
+                         onclick="document.getElementById('profile_photo').click()">
+                        <input type="file" id="profile_photo" name="profile_photo" accept="image/png, image/jpeg, image/jpg, image/webp" class="hidden" onchange="handleFileSelect(event)">
+                        
+                        <div id="uploadPlaceholder" class="space-y-2">
+                            <div class="w-12 h-12 mx-auto rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                            </div>
+                            <div class="text-sm font-semibold text-slate-700">Click to browse or drag & drop photo</div>
+                            <div class="text-xs text-slate-500">Supports JPG, PNG, WEBP (Clear face facing camera)</div>
+                        </div>
+
+                        <!-- Image Preview -->
+                        <div id="previewContainer" class="hidden flex-col items-center">
+                            <img id="imagePreview" src="#" alt="Preview" class="w-32 h-32 rounded-2xl object-cover ring-4 ring-blue-500/20 shadow-md">
+                            <div class="text-xs text-emerald-600 font-semibold mt-2 flex items-center gap-1">
+                                <i class="fa-solid fa-circle-check"></i> Photo Selected
+                            </div>
+                            <span class="text-[11px] text-slate-400 mt-0.5">Click box again to change</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Webcam Capture Container (Hidden by default) -->
+                <div id="webcamCaptureContainer" class="hidden mt-2 p-4 rounded-2xl border border-slate-200 bg-slate-900 text-white text-center">
+                    <div class="relative w-full max-w-sm mx-auto aspect-video rounded-xl overflow-hidden bg-black mb-3">
+                        <video id="regWebcam" autoplay playsinline class="w-full h-full object-cover transform -scale-x-100"></video>
+                        <canvas id="regCanvas" class="hidden"></canvas>
+                        <!-- Oval guideline -->
+                        <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
+                            <div class="w-40 h-52 border-2 border-dashed border-blue-400 rounded-full opacity-60"></div>
+                        </div>
+                    </div>
+                    <div class="flex justify-center gap-3">
+                        <button type="button" id="btnSnapPhoto" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-md flex items-center gap-1.5">
+                            <i class="fa-solid fa-camera"></i> Capture Photo
+                        </button>
+                        <button type="button" id="btnRetakePhoto" class="hidden px-4 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold">
+                            <i class="fa-solid fa-rotate-left mr-1"></i> Retake
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Guidelines Notice -->
+                <div class="bg-blue-50/70 border border-blue-200/70 rounded-xl p-3 mt-4 text-xs text-blue-900 flex items-start gap-2.5">
+                    <i class="fa-solid fa-circle-info text-blue-600 mt-0.5 text-sm"></i>
+                    <div>
+                        <strong class="font-semibold">Photo Requirements:</strong> Ensure good lighting, front-facing neutral expression, and that no face coverings or dark sunglasses are worn. The AI will cross-match this portrait during voting.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" id="btnSubmit" class="w-full py-3.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-lg shadow-blue-500/25 transition-all hover:shadow-md flex items-center justify-center gap-2">
+                <i class="fa-solid fa-id-badge"></i>
+                Create Voter Account & Verify Email
+            </button>
+
+            <!-- Bottom Redirect -->
+            <div class="text-center text-xs text-slate-500 pt-2">
+                Already have an account? 
+                <a href="{{ url_for('login') }}" class="text-blue-600 hover:text-blue-800 font-semibold underline">
+                    Log in here
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const btnUseFile = document.getElementById('btnUseFile');
+    const btnUseWebcam = document.getElementById('btnUseWebcam');
+    const fileContainer = document.getElementById('fileUploadContainer');
+    const webcamContainer = document.getElementById('webcamCaptureContainer');
+    const fileInput = document.getElementById('profile_photo');
+    const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+    const previewContainer = document.getElementById('previewContainer');
+    const imagePreview = document.getElementById('imagePreview');
+
+    const regWebcam = document.getElementById('regWebcam');
+    const regCanvas = document.getElementById('regCanvas');
+    const btnSnap = document.getElementById('btnSnapPhoto');
+    const btnRetake = document.getElementById('btnRetakePhoto');
+
+    let webcamStream = null;
+
+    btnUseFile.addEventListener('click', () => {
+        btnUseFile.className = "text-xs font-medium px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 border border-blue-200";
+        btnUseWebcam.className = "text-xs font-medium px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200";
+        fileContainer.classList.remove('hidden');
+        webcamContainer.classList.add('hidden');
+        stopWebcam();
+    });
+
+    btnUseWebcam.addEventListener('click', async () => {
+        btnUseWebcam.className = "text-xs font-medium px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 border border-blue-200";
+        btnUseFile.className = "text-xs font-medium px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200";
+        fileContainer.classList.add('hidden');
+        webcamContainer.classList.remove('hidden');
+        await startWebcam();
+    });
+
+    async function startWebcam() {
+        try {
+            webcamStream = await navigator.mediaDevices.getUserMedia({
+                video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' },
+                audio: false
+            });
+            regWebcam.srcObject = webcamStream;
+            btnSnap.classList.remove('hidden');
+            btnRetake.classList.add('hidden');
+        } catch (err) {
+            alert('Unable to access webcam: ' + err.message + '. Please upload a photo file instead.');
+            btnUseFile.click();
+        }
+    }
+
+    function stopWebcam() {
+        if (webcamStream) {
+            webcamStream.getTracks().forEach(track => track.stop());
+            webcamStream = null;
+        }
+    }
+
+    btnSnap.addEventListener('click', () => {
+        regCanvas.width = regWebcam.videoWidth || 640;
+        regCanvas.height = regWebcam.videoHeight || 480;
+        const ctx = regCanvas.getContext('2d');
+        // Mirror the canvas capture to match user mirror view
+        ctx.translate(regCanvas.width, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(regWebcam, 0, 0, regCanvas.width, regCanvas.height);
+        
+        regCanvas.toBlob((blob) => {
+            const file = new File([blob], "webcam_snap.jpg", { type: "image/jpeg" });
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            fileInput.files = dataTransfer.files;
+
+            // Show preview
+            imagePreview.src = URL.createObjectURL(blob);
+            previewContainer.classList.remove('hidden');
+            uploadPlaceholder.classList.add('hidden');
+            
+            // Switch view back to file container with snapshot preview
+            btnUseFile.click();
+        }, 'image/jpeg', 0.95);
+    });
+
+    function handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+                previewContainer.classList.remove('hidden');
+                uploadPlaceholder.classList.add('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Clean up webcam if user navigates away
+    window.addEventListener('beforeunload', stopWebcam);
+</script>
+{% endblock %}

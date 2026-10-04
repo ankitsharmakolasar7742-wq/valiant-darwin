@@ -1,0 +1,471 @@
+{% extends "base.html" %}
+
+{% block title %}Official Ballot - BioVote{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Voter Profile Header Card -->
+    <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+            <div class="relative">
+                {% if user.get('profile_photo') %}
+                    <img src="{{ url_for('static', filename='uploads/profiles/' + user.get('profile_photo')) }}" 
+                         alt="Voter Reference Photo" 
+                         id="registeredPhotoImg"
+                         class="w-16 h-16 rounded-2xl object-cover ring-2 ring-blue-600 shadow-md">
+                {% else %}
+                    <div class="w-16 h-16 rounded-2xl bg-blue-600 text-white flex items-center justify-center text-2xl font-bold">
+                        {{ user.get('full_name', 'V')[0] }}
+                    </div>
+                {% endif %}
+                <span class="absolute -bottom-1 -right-1 bg-emerald-500 text-white rounded-full p-1 text-[10px] shadow" title="Biometrically Enrolled">
+                    <i class="fa-solid fa-shield-check"></i>
+                </span>
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <h1 class="text-xl font-bold text-slate-900">{{ user.get('full_name') }}</h1>
+                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                        Voter ID: @{{ user.get('username') }}
+                    </span>
+                </div>
+                <p class="text-xs text-slate-500 mt-0.5">
+                    Official General Election Ballot • Biometric Verification Active
+                </p>
+            </div>
+        </div>
+
+        <div>
+            {% if has_voted %}
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold shadow-sm">
+                    <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
+                    <span>Ballot Submitted</span>
+                </div>
+            {% else %}
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold shadow-sm">
+                    <i class="fa-solid fa-hourglass-half text-amber-600"></i>
+                    <span>Eligible to Vote (1 Vote Remaining)</span>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Case 1: Voter Has Already Voted -->
+    {% if has_voted %}
+        <div class="bg-gradient-to-br from-emerald-50 via-teal-50 to-white rounded-3xl border border-emerald-200 p-8 sm:p-12 text-center max-w-2xl mx-auto shadow-md space-y-5">
+            <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-4xl mx-auto shadow-inner">
+                <i class="fa-solid fa-check-double"></i>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Your Vote Has Been Recorded</h2>
+            <p class="text-sm text-slate-600 max-w-md mx-auto">
+                Thank you for participating! Your ballot for <strong class="text-slate-900">{{ voter_status['party_name'] }}</strong> (Candidate: {{ voter_status['candidate_name'] }}) was verified biometrically and recorded on {{ voter_status['voted_at'] }}.
+            </p>
+
+            {% if voter_status['receipt_token'] %}
+                <div class="pt-2">
+                    <a href="{{ url_for('vote_success', receipt_token=voter_status['receipt_token']) }}" 
+                       class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md shadow-emerald-600/20 transition">
+                        <i class="fa-solid fa-receipt"></i>
+                        View Official Digital Ballot Receipt
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+
+    <!-- Case 2: Voter Has Not Voted Yet - Show Parties Ballot -->
+    {% else %}
+        <div class="mb-6">
+            <h2 class="text-xl font-bold text-slate-900">Official Candidate Ballot</h2>
+            <p class="text-xs text-slate-500 mt-1">
+                Select your chosen candidate or political party below. Clicking "Vote" will launch the AI facial verification challenge to authenticate your vote.
+            </p>
+        </div>
+
+        {% if parties|length == 0 %}
+            <div class="bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-500">
+                <i class="fa-solid fa-landmark text-4xl mb-3 text-slate-400"></i>
+                <p class="text-base font-semibold">No political parties registered yet.</p>
+                <p class="text-xs mt-1">Please ask the election administrator to add parties via the Admin Portal.</p>
+            </div>
+        {% else %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {% for party in parties %}
+                    <div class="bg-white rounded-2xl border border-slate-200 hover:border-blue-400 transition-all shadow-sm hover:shadow-md overflow-hidden flex flex-col justify-between">
+                        <!-- Top Accent Bar -->
+                        <div class="h-2 w-full" style="background-color: {{ party['color'] or '#2563eb' }};"></div>
+                        
+                        <div class="p-6">
+                            <div class="flex items-start gap-4">
+                                <!-- Party Symbol -->
+                                <div class="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 border border-slate-100 shadow-sm"
+                                     style="background-color: {{ party['color'] }}15; color: {{ party['color'] or '#2563eb' }};">
+                                    {% if party['symbol_type'] == 'image' and party['symbol_image'] %}
+                                        <img src="{{ url_for('static', filename='uploads/parties/' + party['symbol_image']) }}" 
+                                             alt="{{ party['name'] }}" class="w-12 h-12 object-contain rounded-xl">
+                                    {% else %}
+                                        <i class="{{ party['symbol_icon'] or 'fa-solid fa-landmark' }} text-2xl"></i>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Party Info -->
+                                <div class="flex-grow">
+                                    <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider text-white mb-1.5"
+                                          style="background-color: {{ party['color'] or '#2563eb' }};">
+                                        Party #{{ party['id'] }}
+                                    </span>
+                                    <h3 class="text-lg font-bold text-slate-900 leading-snug">{{ party['name'] }}</h3>
+                                    <div class="text-xs font-semibold text-slate-600 mt-0.5 flex items-center gap-1.5">
+                                        <i class="fa-solid fa-user-tie opacity-60"></i>
+                                        <span>Candidate: <strong>{{ party['candidate_name'] }}</strong></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Description / Manifesto -->
+                            {% if party['description'] %}
+                                <p class="text-xs text-slate-500 mt-4 leading-relaxed line-clamp-3 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                    {{ party['description'] }}
+                                </p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Action Button -->
+                        <div class="p-4 bg-slate-50/70 border-t border-slate-100 flex items-center justify-between">
+                            <span class="text-[11px] text-slate-400 font-medium">Requires Biometric Verification</span>
+                            <button type="button" 
+                                    onclick="startVotingModal({{ party['id'] }}, '{{ party['name']|escape }}', '{{ party['candidate_name']|escape }}', '{{ party['color'] }}', '{{ party['symbol_icon'] }}', '{{ party['symbol_image'] or '' }}')"
+                                    class="px-5 py-2.5 rounded-xl font-bold text-xs text-white shadow-sm transition hover:scale-[1.02] flex items-center gap-2"
+                                    style="background-color: {{ party['color'] or '#2563eb' }};">
+                                <i class="fa-solid fa-check-to-slot"></i>
+                                Vote for {{ party['candidate_name'] }}
+                            </button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+
+<!-- ========================================================= -->
+<!-- BIOMETRIC FACE VERIFICATION & LIVENESS CAMERA MODAL       -->
+<!-- ========================================================= -->
+<div id="votingModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-3xl w-full overflow-hidden transition-all animate-scale-in">
+        
+        <!-- Modal Header -->
+        <div class="bg-slate-900 text-white p-5 px-6 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white text-lg shadow-md shadow-blue-500/30">
+                    <i class="fa-solid fa-expand"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-base leading-tight">Live Face Verification & Anti-Spoofing</h3>
+                    <div class="text-[11px] text-slate-400 flex items-center gap-1.5">
+                        Voting for: <span id="modalPartyName" class="font-bold text-white">Party Name</span>
+                        (<span id="modalCandidateName" class="text-blue-300">Candidate</span>)
+                    </div>
+                </div>
+            </div>
+            <button type="button" onclick="closeVotingModal()" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800 transition">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="p-6 space-y-6">
+            <!-- Active Anti-Spoofing Challenge Banner -->
+            <div id="challengeBanner" class="p-4 rounded-2xl bg-blue-50 border border-blue-200 flex items-center gap-4 transition-all">
+                <div id="challengeIconBox" class="w-12 h-12 rounded-xl bg-blue-600 text-white flex items-center justify-center text-xl shrink-0 shadow-md">
+                    <i id="challengeIcon" class="fa-solid fa-eye"></i>
+                </div>
+                <div class="flex-grow">
+                    <div class="flex items-center justify-between mb-1">
+                        <span id="challengeTitle" class="text-xs font-bold uppercase tracking-wider text-blue-800">Assigned Liveness Challenge</span>
+                        <span id="challengeProgressText" class="text-xs font-bold text-blue-700">0%</span>
+                    </div>
+                    <p id="challengeInstruction" class="text-xs text-slate-700 font-medium">
+                        Initializing facial scanner...
+                    </p>
+                    <!-- Progress Bar -->
+                    <div class="w-full bg-blue-200/70 h-2 rounded-full mt-2 overflow-hidden">
+                        <div id="challengeProgressBar" class="bg-blue-600 h-full rounded-full transition-all duration-300 w-0"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Side-by-Side Dual Facial Compare View -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Left: Registered Reference Photo -->
+                <div class="bg-slate-100 rounded-2xl p-3 border border-slate-200 flex flex-col items-center justify-center text-center">
+                    <span class="text-[11px] font-bold uppercase text-slate-500 mb-2 flex items-center gap-1">
+                        <i class="fa-solid fa-id-card text-blue-600"></i> Registered Profile Photo
+                    </span>
+                    <div class="relative w-44 h-44 rounded-2xl overflow-hidden ring-4 ring-slate-200 shadow-inner bg-slate-200 flex items-center justify-center">
+                        {% if user.get('profile_photo') %}
+                            <img src="{{ url_for('static', filename='uploads/profiles/' + user.get('profile_photo')) }}" 
+                                 alt="Voter Reference" 
+                                 class="w-full h-full object-cover">
+                        {% else %}
+                            <i class="fa-solid fa-user text-4xl text-slate-400"></i>
+                        {% endif %}
+                        <div class="absolute bottom-1 bg-black/60 backdrop-blur-sm text-white text-[10px] px-2 py-0.5 rounded-full font-mono">
+                            Stored Biometric
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Live Webcam Feed -->
+                <div class="bg-slate-900 rounded-2xl p-3 border border-slate-800 flex flex-col items-center justify-center text-center text-white relative">
+                    <span class="text-[11px] font-bold uppercase text-slate-300 mb-2 flex items-center gap-1">
+                        <i class="fa-solid fa-video text-emerald-400"></i> Live Webcam Feed
+                    </span>
+                    
+                    <div class="relative w-44 h-44 rounded-2xl overflow-hidden ring-4 ring-slate-700 bg-black flex items-center justify-center">
+                        <video id="liveWebcam" autoplay playsinline muted class="w-full h-full object-cover transform -scale-x-100"></video>
+                        <canvas id="frameCanvas" class="hidden"></canvas>
+
+                        <!-- Oval Target Face Guide Overlay -->
+                        <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
+                            <div id="targetFaceGuide" class="w-32 h-40 border-2 border-dashed border-amber-400 rounded-full transition-colors duration-300"></div>
+                        </div>
+
+                        <!-- Real-time Scanner Line -->
+                        <div id="scannerLine" class="scanner-line absolute left-4 right-4 h-0.5 bg-blue-400 shadow-[0_0_8px_#38bdf8] opacity-80 pointer-events-none"></div>
+
+                        <!-- Real-time Match Indicator Badge -->
+                        <div id="matchBadge" class="absolute bottom-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-black/70 border border-slate-600 text-slate-300 flex items-center gap-1 font-mono">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+                            <span id="matchScoreText">Matching...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feedback Status Pill -->
+            <div id="feedbackPill" class="text-center py-2.5 px-4 rounded-xl bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-700 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-spinner fa-spin text-blue-600"></i>
+                <span id="feedbackText">Please look directly into the camera...</span>
+            </div>
+
+            <!-- Action Buttons: Cancel vs Submit Vote -->
+            <div class="flex items-center justify-end gap-3 pt-2">
+                <button type="button" onclick="closeVotingModal()" class="px-5 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold text-xs transition">
+                    Cancel
+                </button>
+                <button type="button" id="btnConfirmVote" disabled 
+                        onclick="submitVoteAction()"
+                        class="px-6 py-2.5 rounded-xl bg-slate-300 text-slate-500 font-bold text-xs cursor-not-allowed transition-all flex items-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-lock"></i>
+                    <span id="btnConfirmText">Face Verification Required</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let selectedPartyId = null;
+    let webcamStream = null;
+    let verifyInterval = null;
+    let isVerifying = false;
+    let verificationDone = false;
+
+    const modal = document.getElementById('votingModal');
+    const modalPartyName = document.getElementById('modalPartyName');
+    const modalCandidateName = document.getElementById('modalCandidateName');
+    const liveWebcam = document.getElementById('liveWebcam');
+    const frameCanvas = document.getElementById('frameCanvas');
+    const challengeTitle = document.getElementById('challengeTitle');
+    const challengeInstruction = document.getElementById('challengeInstruction');
+    const challengeProgressText = document.getElementById('challengeProgressText');
+    const challengeProgressBar = document.getElementById('challengeProgressBar');
+    const challengeIcon = document.getElementById('challengeIcon');
+    const challengeIconBox = document.getElementById('challengeIconBox');
+    const targetFaceGuide = document.getElementById('targetFaceGuide');
+    const matchBadge = document.getElementById('matchBadge');
+    const matchScoreText = document.getElementById('matchScoreText');
+    const feedbackPill = document.getElementById('feedbackPill');
+    const feedbackText = document.getElementById('feedbackText');
+    const btnConfirmVote = document.getElementById('btnConfirmVote');
+    const btnConfirmText = document.getElementById('btnConfirmText');
+
+    async function startVotingModal(partyId, partyName, candidateName, color, icon, img) {
+        selectedPartyId = partyId;
+        modalPartyName.innerText = partyName;
+        modalCandidateName.innerText = candidateName;
+        verificationDone = false;
+        isVerifying = false;
+
+        // Reset UI state
+        btnConfirmVote.disabled = true;
+        btnConfirmVote.className = "px-6 py-2.5 rounded-xl bg-slate-300 text-slate-500 font-bold text-xs cursor-not-allowed transition-all flex items-center gap-2 shadow-sm";
+        btnConfirmText.innerText = "Face Verification Required";
+        targetFaceGuide.className = "w-32 h-40 border-2 border-dashed border-amber-400 rounded-full transition-colors duration-300";
+        challengeProgressBar.style.width = "0%";
+        challengeProgressText.innerText = "0%";
+        feedbackText.innerText = "Initializing biometric camera...";
+        matchScoreText.innerText = "Detecting...";
+
+        // Open modal
+        modal.classList.remove('hidden');
+
+        // 1. Request random anti-spoofing challenge from server
+        try {
+            const resp = await fetch("{{ url_for('api_start_verification') }}", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ party_id: partyId })
+            });
+            const data = await resp.json();
+            if (data.success) {
+                challengeTitle.innerText = data.challenge.title;
+                challengeInstruction.innerText = data.challenge.instruction;
+                challengeIcon.className = data.challenge.icon;
+            }
+        } catch (e) {
+            console.error("Challenge error:", e);
+        }
+
+        // 2. Start webcam
+        try {
+            webcamStream = await navigator.mediaDevices.getUserMedia({
+                video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: "user" },
+                audio: false
+            });
+            liveWebcam.srcObject = webcamStream;
+            
+            // Wait for webcam video to start playing before starting loop
+            liveWebcam.onloadedmetadata = () => {
+                startVerificationLoop();
+            };
+        } catch (err) {
+            alert("Camera access error: " + err.message + ". Please ensure your webcam is enabled.");
+            closeVotingModal();
+        }
+    }
+
+    function startVerificationLoop() {
+        if (verifyInterval) clearInterval(verifyInterval);
+        
+        // Loop every 400ms to analyze frames
+        verifyInterval = setInterval(async () => {
+            if (isVerifying || verificationDone) return;
+            isVerifying = true;
+
+            try {
+                // Capture frame from webcam to canvas
+                frameCanvas.width = liveWebcam.videoWidth || 640;
+                frameCanvas.height = liveWebcam.videoHeight || 480;
+                const ctx = frameCanvas.getContext('2d');
+                // Mirror frame so it matches user's natural orientation
+                ctx.translate(frameCanvas.width, 0);
+                ctx.scale(-1, 1);
+                ctx.drawImage(liveWebcam, 0, 0, frameCanvas.width, frameCanvas.height);
+
+                const dataUrl = frameCanvas.toDataURL('image/jpeg', 0.85);
+
+                const resp = await fetch("{{ url_for('api_verify_frame') }}", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ image: dataUrl })
+                });
+
+                const res = await resp.json();
+
+                if (res.success) {
+                    // Update Match Badge
+                    if (res.face_detected) {
+                        matchScoreText.innerText = `${res.match_pct}% Match`;
+                        if (res.is_matched) {
+                            matchBadge.className = "absolute bottom-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-950/80 border border-emerald-500 text-emerald-300 flex items-center gap-1 font-mono";
+                        } else {
+                            matchBadge.className = "absolute bottom-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-950/80 border border-amber-500 text-amber-300 flex items-center gap-1 font-mono";
+                        }
+                    } else {
+                        matchScoreText.innerText = "No Face";
+                        matchBadge.className = "absolute bottom-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-black/70 border border-slate-600 text-slate-400 flex items-center gap-1 font-mono";
+                    }
+
+                    // Update Progress & Feedback
+                    challengeProgressBar.style.width = `${res.progress}%`;
+                    challengeProgressText.innerText = `${res.progress}%`;
+                    feedbackText.innerText = res.message;
+
+                    // If verified
+                    if (res.can_submit) {
+                        verificationDone = true;
+                        clearInterval(verifyInterval);
+
+                        targetFaceGuide.className = "w-32 h-40 border-4 border-solid border-emerald-500 rounded-full shadow-[0_0_15px_#10b981] transition-all";
+                        challengeIconBox.className = "w-12 h-12 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-xl shrink-0 shadow-md";
+                        challengeIcon.className = "fa-solid fa-circle-check";
+                        
+                        feedbackPill.className = "text-center py-2.5 px-4 rounded-xl bg-emerald-50 border border-emerald-300 text-xs font-bold text-emerald-800 flex items-center justify-center gap-2";
+                        feedbackText.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i> Face Match Verified (${res.match_pct}%) & Liveness Passed!`;
+
+                        // Activate Vote Button
+                        btnConfirmVote.disabled = false;
+                        btnConfirmVote.className = "px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-lg shadow-emerald-600/30 transition-all hover:scale-105 flex items-center gap-2 cursor-pointer pulse-ring";
+                        btnConfirmText.innerText = "SUBMIT OFFICIAL VOTE";
+                    }
+                }
+            } catch (err) {
+                console.error("Frame verification error:", err);
+            } finally {
+                isVerifying = false;
+            }
+        }, 400);
+    }
+
+    async function submitVoteAction() {
+        if (!verificationDone) return;
+
+        btnConfirmVote.disabled = true;
+        btnConfirmText.innerText = "Recording Ballot...";
+
+        try {
+            const resp = await fetch("{{ url_for('api_cast_vote') }}", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ party_id: selectedPartyId })
+            });
+
+            const data = await resp.json();
+            if (data.success) {
+                stopWebcam();
+                window.location.href = data.redirect_url;
+            } else {
+                alert("Error casting vote: " + data.error);
+                btnConfirmVote.disabled = false;
+                btnConfirmText.innerText = "SUBMIT OFFICIAL VOTE";
+            }
+        } catch (err) {
+            alert("Submission error: " + err.message);
+            btnConfirmVote.disabled = false;
+            btnConfirmText.innerText = "SUBMIT OFFICIAL VOTE";
+        }
+    }
+
+    function closeVotingModal() {
+        stopWebcam();
+        if (verifyInterval) {
+            clearInterval(verifyInterval);
+            verifyInterval = null;
+        }
+        modal.classList.add('hidden');
+    }
+
+    function stopWebcam() {
+        if (webcamStream) {
+            webcamStream.getTracks().forEach(track => track.stop());
+            webcamStream = null;
+        }
+    }
+
+    window.addEventListener('beforeunload', stopWebcam);
+</script>
+{% endblock %}

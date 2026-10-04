@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}BioVote - Next-Gen Face Detection Voting System{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16">
+    <!-- Hero Section -->
+    <div class="text-center max-w-3xl mx-auto space-y-6">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200/80 text-blue-700 text-xs font-semibold shadow-sm">
+            <span class="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
+            AI-Powered Biometric Election Security
+        </div>
+        
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-tight">
+            Secure Voting with <br/>
+            <span class="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                Live Facial Verification
+            </span>
+        </h1>
+        
+        <p class="text-lg text-slate-600 leading-relaxed font-normal">
+            Eliminate voter fraud and proxy voting with real-time biometric face matching and interactive anti-spoofing liveness detection (eye blink, head turns, and expressions).
+        </p>
+        
+        <!-- CTA Buttons -->
+        <div class="flex flex-wrap items-center justify-center gap-4 pt-4">
+            {% if session.get('user_id') %}
+                <a href="{{ url_for('vote') }}" class="px-7 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-base shadow-lg shadow-blue-500/25 transition-all hover:scale-[1.02] flex items-center gap-2">
+                    <i class="fa-solid fa-check-to-slot"></i>
+                    Go to Voting Ballot
+                </a>
+            {% else %}
+                <a href="{{ url_for('register') }}" class="px-7 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-base shadow-lg shadow-blue-500/25 transition-all hover:scale-[1.02] flex items-center gap-2">
+                    <i class="fa-solid fa-user-plus"></i>
+                    Register as Voter
+                </a>
+                <a href="{{ url_for('login') }}" class="px-7 py-3.5 rounded-xl bg-white hover:bg-slate-50 text-slate-800 font-semibold text-base border border-slate-300 shadow-sm transition-all hover:border-slate-400 flex items-center gap-2">
+                    <i class="fa-solid fa-right-to-bracket text-blue-600"></i>
+                    Voter Login
+                </a>
+            {% endif %}
+            <a href="{{ url_for('admin_login') }}" class="px-6 py-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-base shadow-md transition-all flex items-center gap-2">
+                <i class="fa-solid fa-shield-halved text-indigo-400"></i>
+                Admin Portal
+            </a>
+        </div>
+    </div>
+
+    <!-- Live Stats Ticker -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mt-16">
+        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-landmark"></i>
+            </div>
+            <div>
+                <div class="text-2xl font-bold text-slate-900">{{ parties_count }}</div>
+                <div class="text-xs font-medium text-slate-500">Registered Political Parties</div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-users"></i>
+            </div>
+            <div>
+                <div class="text-2xl font-bold text-slate-900">{{ voters_count }}</div>
+                <div class="text-xs font-medium text-slate-500">Enrolled Voters</div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-envelope-open-text"></i>
+            </div>
+            <div>
+                <div class="text-2xl font-bold text-slate-900">{{ votes_count }}</div>
+                <div class="text-xs font-medium text-slate-500">Verified Ballots Cast</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- How the Biometric Election Workflow Operates -->
+    <div class="mt-20">
+        <div class="text-center max-w-xl mx-auto mb-12">
+            <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">How the Biometric System Works</h2>
+            <p class="text-slate-600 text-sm mt-2">End-to-end security designed to protect democratic elections with artificial intelligence.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <!-- Step 1 -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative group hover:border-blue-300 transition-all">
+                <div class="w-10 h-10 rounded-xl bg-blue-600 text-white font-bold text-sm flex items-center justify-center mb-4 shadow-md shadow-blue-500/30">
+                    1
+                </div>
+                <h3 class="font-bold text-slate-900 text-base mb-1">Registration & Photo</h3>
+                <p class="text-slate-500 text-xs leading-relaxed">
+                    Voters sign up with their credentials and upload a reference photo. SFace extracts a 128-dimension biometric facial template.
+                </p>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative group hover:border-blue-300 transition-all">
+                <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white font-bold text-sm flex items-center justify-center mb-4 shadow-md shadow-indigo-500/30">
+                    2
+                </div>
+                <h3 class="font-bold text-slate-900 text-base mb-1">Email Verification</h3>
+                <p class="text-slate-500 text-xs leading-relaxed">
+                    Voter enters a 6-digit one-time password (OTP) to authenticate their email address before accessing the voting booth.
+                </p>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative group hover:border-blue-300 transition-all">
+                <div class="w-10 h-10 rounded-xl bg-violet-600 text-white font-bold text-sm flex items-center justify-center mb-4 shadow-md shadow-violet-500/30">
+                    3
+                </div>
+                <h3 class="font-bold text-slate-900 text-base mb-1">Live Liveness Challenge</h3>
+                <p class="text-slate-500 text-xs leading-relaxed">
+                    Clicking a party initiates the webcam. The system presents a random challenge (Blink, Turn Left/Right, or Smile) to prevent photo spoofing.
+                </p>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative group hover:border-blue-300 transition-all">
+                <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white font-bold text-sm flex items-center justify-center mb-4 shadow-md shadow-emerald-500/30">
+                    4
+                </div>
+                <h3 class="font-bold text-slate-900 text-base mb-1">Face Match & Vote Cast</h3>
+                <p class="text-slate-500 text-xs leading-relaxed">
+                    Once face matches registered profile and liveness passes, the vote is submitted and an official digital ballot receipt is generated.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

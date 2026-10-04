@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BioVote - AI Face Detection Voting System{% endblock %}</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .scanner-line {
+            animation: scan 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes scan {
+            0%, 100% { top: 5%; }
+            50% { top: 90%; }
+        }
+        .pulse-ring {
+            box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7);
+            animation: pulse-ring-anim 1.8s infinite;
+        }
+        @keyframes pulse-ring-anim {
+            0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(37, 99, 235, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+        }
+    </style>
+    {% block head %}{% endblock %}
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white">
+
+    <!-- Top Navigation Bar -->
+    <nav class="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 transition-all">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Brand Logo -->
+                <div class="flex items-center gap-3">
+                    <a href="{{ url_for('index') }}" class="flex items-center gap-2.5 group">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-700 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform">
+                            <i class="fa-solid fa-fingerprint text-xl"></i>
+                        </div>
+                        <div class="leading-tight">
+                            <span class="text-xl font-bold bg-gradient-to-r from-blue-700 to-indigo-600 bg-clip-text text-transparent">BioVote</span>
+                            <span class="block text-[10px] uppercase tracking-wider font-semibold text-slate-600">AI Face Verification</span>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Navigation Links -->
+                <div class="hidden md:flex items-center gap-6">
+                    <a href="{{ url_for('index') }}" class="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">
+                        <i class="fa-solid fa-house mr-1.5 opacity-70"></i>Home
+                    </a>
+                    <a href="{{ url_for('vote') }}" class="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">
+                        <i class="fa-solid fa-check-to-slot mr-1.5 opacity-70"></i>Vote Ballot
+                    </a>
+                    <a href="{{ url_for('admin_login') }}" class="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">
+                        <i class="fa-solid fa-shield-halved mr-1.5 opacity-70"></i>Admin Portal
+                    </a>
+                </div>
+
+                <!-- User Session / Action Buttons -->
+                <div class="flex items-center gap-3">
+                    {% if session.get('user_id') %}
+                        <!-- User Logged In -->
+                        <div class="flex items-center gap-3 bg-slate-100/80 px-3 py-1.5 rounded-full border border-slate-200">
+                            {% if session.get('profile_photo') %}
+                                <img src="{{ url_for('static', filename='uploads/profiles/' + session.get('profile_photo')) }}" alt="Avatar" class="w-7 h-7 rounded-full object-cover ring-2 ring-blue-600/30">
+                            {% else %}
+                                <div class="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">
+                                    {{ session.get('full_name', 'U')[0] }}
+                                </div>
+                            {% endif %}
+                            <span class="text-xs font-semibold text-slate-700 hidden sm:inline">{{ session.get('full_name') }}</span>
+                            <a href="{{ url_for('logout') }}" class="text-slate-600 hover:text-red-700 text-xs font-medium pl-1 transition-colors" title="Log Out">
+                                <i class="fa-solid fa-right-from-bracket"></i>
+                            </a>
+                        </div>
+                    {% elif session.get('admin_id') %}
+                        <!-- Admin Logged In -->
+                        <div class="flex items-center gap-2">
+                            <a href="{{ url_for('admin_dashboard') }}" class="px-3.5 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 text-xs font-semibold border border-indigo-200 transition-colors">
+                                <i class="fa-solid fa-gauge mr-1.5"></i>Admin Panel
+                            </a>
+                            <a href="{{ url_for('admin_logout') }}" class="text-slate-600 hover:text-red-700 text-sm px-2 py-1" title="Log Out">
+                                <i class="fa-solid fa-right-from-bracket"></i>
+                            </a>
+                        </div>
+                    {% else %}
+                        <!-- Guest Options -->
+                        <a href="{{ url_for('login') }}" class="text-sm font-semibold text-slate-700 hover:text-blue-600 px-3 py-2 rounded-lg transition-colors">
+                            Log In
+                        </a>
+                        <a href="{{ url_for('register') }}" class="text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl shadow-sm shadow-blue-500/30 transition-all hover:shadow-md">
+                            Register to Vote
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Alert Messages -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 w-full mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {% set bg = "bg-blue-50 text-blue-800 border-blue-200" %}
+                    {% set icon = "fa-circle-info" %}
+                    {% if category == "success" %}
+                        {% set bg = "bg-emerald-50 text-emerald-800 border-emerald-200" %}
+                        {% set icon = "fa-circle-check text-emerald-600" %}
+                    {% elif category == "danger" %}
+                        {% set bg = "bg-rose-50 text-rose-800 border-rose-200" %}
+                        {% set icon = "fa-circle-exclamation text-rose-600" %}
+                    {% elif category == "warning" %}
+                        {% set bg = "bg-amber-50 text-amber-800 border-amber-200" %}
+                        {% set icon = "fa-triangle-exclamation text-amber-600" %}
+                    {% endif %}
+                    <div class="flex items-center justify-between p-3.5 mb-3 rounded-xl border {{ bg }} text-sm font-medium shadow-sm transition-all animate-fade-in">
+                        <div class="flex items-center gap-2.5">
+                            <i class="fa-solid {{ icon }} text-base"></i>
+                            <span>{{ message }}</span>
+                        </div>
+                        <button onclick="this.parentElement.remove()" class="text-slate-600 hover:text-slate-800 p-1">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 mt-16 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-shield-halved text-blue-600 text-sm"></i>
+                <span class="font-medium text-slate-700">BioVote Biometric Election Platform</span>
+                <span>• YuNet & SFace Powered Facial Recognition • MediaPipe Anti-Spoofing</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <span>Tamper-Proof Digital Ballots</span>
+                <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
+                <span>One Voter, One Vote</span>
+                <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
+                <a href="{{ url_for('admin_login') }}" class="hover:text-blue-600 underline font-medium">Admin Portal</a>
+            </div>
+        </div>
+    </footer>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

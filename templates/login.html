@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Voter Login - BioVote{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto px-4 py-12">
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden">
+        <!-- Login Header -->
+        <div class="bg-gradient-to-r from-blue-700 to-indigo-700 p-8 text-white text-center">
+            <div class="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white text-2xl mx-auto mb-3 shadow-inner">
+                <i class="fa-solid fa-right-to-bracket"></i>
+            </div>
+            <h1 class="text-2xl font-bold tracking-tight">Voter Authentication</h1>
+            <p class="text-blue-100 text-xs mt-1">Sign in with your registered username and password</p>
+        </div>
+
+        <!-- Form -->
+        <form action="{{ url_for('login') }}" method="POST" class="p-6 sm:p-8 space-y-5">
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5" for="username">
+                    Voter Username
+                </label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-at"></i>
+                    </span>
+                    <input type="text" id="username" name="username" required autofocus placeholder="Enter your username"
+                           class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm text-slate-800 transition">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5" for="password">
+                    Password
+                </label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-lock"></i>
+                    </span>
+                    <input type="password" id="password" name="password" required placeholder="••••••••"
+                           class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm text-slate-800 transition">
+                </div>
+            </div>
+
+            <button type="submit" class="w-full py-3.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-lg shadow-blue-500/25 transition-all hover:shadow-md flex items-center justify-center gap-2">
+                <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                Sign In to Voting Ballot
+            </button>
+
+            <!-- Bottom Navigation -->
+            <div class="pt-4 border-t border-slate-100 flex flex-col gap-2 text-center text-xs">
+                <span class="text-slate-500">
+                    New voter? 
+                    <a href="{{ url_for('register') }}" class="text-blue-600 font-bold hover:underline">
+                        Register here with photo
+                    </a>
+                </span>
+                <span class="text-slate-400">
+                    Election Official? 
+                    <a href="{{ url_for('admin_login') }}" class="text-slate-600 hover:text-slate-800 font-semibold underline">
+                        Access Admin Portal
+                    </a>
+                </span>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
